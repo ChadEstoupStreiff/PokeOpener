@@ -7,21 +7,25 @@ def page1():
         result = requests.get(
             f"http://pokeopener_back:80/cards/draw?token={st.session_state.token}",
         ).json()
-        st.text("You got:")
-        st.text(result["name"])
-        st.image(result["images"]["large"])
-        st.write(result)
+        st.session_state.last_card = result
+    if "last_card" in st.session_state:
+        card = st.session_state.last_card
+        st.text(f"You got: {card['name']}")
+        st.image(card["images"]["large"])
 
 
 def page2():
-    st.title(f"Inventory of {st.session_state.full_name}")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.title(f"Inventory of {st.session_state.full_name}")
+    with c2:
+        n_cols = st.slider("Number of columns", 4, 15, 6)
 
     cards_id = requests.get(
         f"http://pokeopener_back:80/cards/inventory?token={st.session_state.token}",
     ).json()
     st.text(f"You have: {len(cards_id)} cards")
 
-    n_cols = 4
     cols = st.columns(n_cols)
     for i, card in enumerate(cards_id):
         card_info = requests.get(
@@ -54,6 +58,8 @@ def disconnect():
     st.rerun()
 
 
+st.set_page_config(page_title="PokeOpener", page_icon="🔥", layout="wide")
+
 if "logged" not in st.session_state:
     st.session_state.logged = False
 
@@ -76,7 +82,10 @@ if not st.session_state.logged:
                     result = requests.post(
                         f"http://pokeopener_back:80/auth/register?email={email}&password={password}&full_name={full_name}",
                     ).json()
-                    if "message" not in result or result["message"] != "User registered successfully":
+                    if (
+                        "message" not in result
+                        or result["message"] != "User registered successfully"
+                    ):
                         raise Exception()
                     try_login(email, password)
             except Exception as _:
