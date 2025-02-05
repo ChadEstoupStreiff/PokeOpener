@@ -68,6 +68,7 @@ def test_token_validity():
 
 if __name__ == "__main__":
     print("Starting tests...")
+    print(f"Test url: {url}")
     print(f"Test uuid: {test_uuid}")
     print(f"Test email: {email}")
     print(f"Test password: {password}")
