@@ -2,6 +2,7 @@ import requests
 import random
 import string
 import uuid
+import time
 
 test_uuid = uuid.uuid4()
 url = "http://localhost:8081"
@@ -10,7 +11,13 @@ password = f"testpwd_{test_uuid}"
 full_name = "Test User"
 
 def test_url():
-    response = requests.get(f"{url}/docs")
+    for _ in range(20):
+        response = requests.get(f"{url}/docs")
+        
+        if response.status_code == 200:
+            break
+        
+        time.sleep(5)
     
     assert response.status_code == 200
 
