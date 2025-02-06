@@ -2,22 +2,15 @@ import requests
 import random
 import string
 import uuid
-import time
 
 test_uuid = uuid.uuid4()
-url = "http://localhost:8081"
+url = "http://127.0.0.1:8081"
 email = f"test_{test_uuid}@gmail.com"
 password = f"testpwd_{test_uuid}"
 full_name = "Test User"
 
 def test_url():
-    for _ in range(20):
-        response = requests.get(f"{url}/docs")
-        
-        if response.status_code == 200:
-            break
-        
-        time.sleep(5)
+    response = requests.get(f"{url}/docs")
     
     assert response.status_code == 200
 
