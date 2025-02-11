@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlalchemy import Column, DateTime, ForeignKey, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
@@ -44,12 +44,27 @@ class Item(Base):
     owner_id = Column(String(255), ForeignKey("users.id"))
     card_id = Column(String(255))
     date_obtained = Column(DateTime)
+    faved = Column(Boolean, default=False)
 
     def get_card_of_user(db: Session, owner_id: str):
         return db.query(Item).filter(Item.owner_id == owner_id).all()
+    
+    def get_specific_card_of_user(db: Session, owner_id: str, id: str):
+        return db.query(Item).filter(Item.owner_id == owner_id, Item.id == id).first()
 
     def add_card(db: Session, owner_id: str, card_id: str):
         item = Item(owner_id=owner_id, card_id=card_id)
         db.add(item)
         db.commit()
         return item
+    
+    def get_cards_fav(db: Session, id: str):
+        return db.query(Item).filter(Item.owner_id == id, Item.faved == True).all()
+
+    def toggle_fav(db: Session, id: str):
+        item = db.query(Item).filter(Item.id == id).first()
+        item.faved = not item.faved
+        db.commit()
+        return item
+        
+        

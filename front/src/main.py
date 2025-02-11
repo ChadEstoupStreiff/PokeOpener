@@ -12,6 +12,10 @@ def page1():
         card = st.session_state.last_card
         st.text(f"You got: {card['name']}")
         st.image(card["images"]["large"])
+        if st.button("❤️", key=f"fav_{card['id']}"):
+            requests.post(
+                f"http://pokeopener_back:80/cards/fav?token={st.session_state.token}&id={card['id']}"
+            )
 
 
 def page2():
@@ -27,13 +31,46 @@ def page2():
     st.text(f"You have: {len(cards_id)} cards")
 
     cols = st.columns(n_cols)
+    for i, card in enumerate(sorted(cards_id, key=lambda card: not card["faved"])):
+        card_info = requests.get(
+            f"http://pokeopener_back:80/cards/get?card_id={card['card_id']}",
+        ).json()
+        with cols[i % n_cols]:
+            st.image(card_info["images"]["small"])
+            if card["faved"]:
+                st.markdown("⭐ **Favorite**")
+            else:
+                st.markdown(" ")
+            if st.button("❤️", key=f"fav_{card['id']}", use_container_width=True):
+                requests.post(
+                    f"http://pokeopener_back:80/cards/fav?token={st.session_state.token}&id={card['id']}"
+                )
+                st.rerun()
+
+def page3():
+    c1, c2 = st.columns(2)
+    with c1:
+        st.title(f"Favorited cards of {st.session_state.full_name}")
+    with c2:
+        n_cols = st.slider("Number of columns", 4, 15, 6)
+
+    cards_id = requests.get(
+        f"http://pokeopener_back:80/cards/getFav?token={st.session_state.token}",
+    ).json()
+    st.text(f"You have: {len(cards_id)} favorited cards")
+
+    cols = st.columns(n_cols)
     for i, card in enumerate(cards_id):
         card_info = requests.get(
             f"http://pokeopener_back:80/cards/get?card_id={card['card_id']}",
         ).json()
         with cols[i % n_cols]:
             st.image(card_info["images"]["small"])
-
+            if st.button("unfav", key=f"fav_{card['id']}"):
+                requests.post(
+                    f"http://pokeopener_back:80/cards/fav?token={st.session_state.token}&id={card['id']}"
+                )
+                st.rerun()
 
 def try_login(email, password):
     with st.spinner("Logging in..."):
@@ -96,6 +133,7 @@ else:
         [
             st.Page(page1, title="Card opening", icon="🔥"),
             st.Page(page2, title="Inventory", icon="💼"),
+            st.Page(page3, title="Favorites", icon="💖"),
             # st.Page(disconnect, title="Disconnect", icon="🚪"),
         ]
     )

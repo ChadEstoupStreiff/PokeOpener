@@ -40,3 +40,17 @@ def get_inventory(token: str, db: Session = Depends(get_db)):
     items = Item.get_card_of_user(db, user.id)
     db.close()
     return items
+
+
+@router.post("/fav")
+def fav_card(token: str, id: str, db: Session = Depends(get_db)):
+    user = User.get_user_by_id(db, get_current_user(token))
+    item = Item.get_specific_card_of_user(db, user.id, id)
+    Item.toggle_fav(db, item.id)
+    
+
+@router.get("/getFav")
+def get_fav(token: str, db: Session = Depends(get_db)):
+    user = User.get_user_by_id(db, get_current_user(token))
+    items = Item.get_cards_fav(db, user.id)
+    return items
