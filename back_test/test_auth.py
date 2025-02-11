@@ -1,7 +1,6 @@
 import uuid
 
 import requests
-import logging
 
 test_uuid = uuid.uuid4()
 url = "http://127.0.0.1:8081"
@@ -15,6 +14,7 @@ card_id = None
 ##############
 # Auth tests #
 ##############
+
 
 def test_url():
     response = requests.get(f"{url}/docs")
@@ -81,6 +81,7 @@ def test_token_validity():
 # Cards tests #
 ###############
 
+
 def test_draw_card():
     response = requests.get(f"{url}/cards/draw?token={token}")
 
@@ -91,12 +92,11 @@ def test_draw_card():
     card_id = response.json().get("id")
 
 
-
 def test_check_card_in_inventory():
     response = requests.get(f"{url}/cards/inventory?token={token}")
 
     assert response.status_code == 200
-    assert any(card['card_id'] == card_id for card in response.json())
+    assert any(card["card_id"] == card_id for card in response.json())
 
 
 def test_get_card_info():
