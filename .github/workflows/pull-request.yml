@@ -58,3 +58,7 @@ jobs:
         run: |
           # Add your test commands here
           cd back_test && pytest
+      
+      - name: Prevent merge if tests fail
+        if: failure()
+        run: exit 1
