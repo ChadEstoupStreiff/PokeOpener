@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import Column, DateTime, ForeignKey, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+import copy
 
 Base = declarative_base()
 
@@ -50,7 +51,7 @@ class Item(Base):
         return db.query(Item).filter(Item.owner_id == owner_id).all()
     
     def get_specific_card_of_user(db: Session, owner_id: str, id: str):
-        return db.query(Item).filter(Item.owner_id == owner_id, Item.id == id).first()
+        return db.query(Item).filter(Item.owner_id == owner_id, Item.id == id).all()
 
     def add_card(db: Session, owner_id: str, card_id: str):
         item = Item(owner_id=owner_id, card_id=card_id)
@@ -61,10 +62,13 @@ class Item(Base):
     def get_cards_fav(db: Session, id: str):
         return db.query(Item).filter(Item.owner_id == id, Item.faved == True).all()
 
-    def toggle_fav(db: Session, id: str):
-        item = db.query(Item).filter(Item.id == id).first()
-        item.faved = not item.faved
-        db.commit()
-        return item
+    def toggle_fav(db: Session, user_id: str, id: str):
+        item = db.query(Item).filter(Item.id == id, Item.owner_id == user_id).first()
+        item_copy = None
+        if item:
+            item.faved = not item.faved
+            item_copy = copy.deepcopy(item)
+            db.commit()
+        return item_copy
         
         

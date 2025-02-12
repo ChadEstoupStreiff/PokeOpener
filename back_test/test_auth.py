@@ -9,6 +9,7 @@ password = f"testpwd_{test_uuid}"
 full_name = "Test User"
 token = None
 card_id = None
+fav_id = None
 
 
 ##############
@@ -98,9 +99,27 @@ def test_check_card_in_inventory():
     assert response.status_code == 200
     assert any(card["card_id"] == card_id for card in response.json())
 
+    global fav_id
+    fav_id = response.json()[0].get("id")
 
 def test_get_card_info():
     response = requests.get(f"{url}/cards/get?card_id={card_id}")
 
     assert response.status_code == 200
     assert "id" in response.json()
+
+def test_fav_card():
+    response = requests.post(f"{url}/cards/fav?token={token}&id={fav_id}")
+
+    assert response.status_code == 200
+    assert response.json().get("faved") == True
+
+    response = requests.post(f"{url}/cards/fav?token={token}&id={fav_id}")
+    assert response.status_code == 200
+    assert response.json().get("faved") == False
+
+def test_get_fav_cards():
+    requests.post(f"{url}/cards/fav?token={token}&id={fav_id}")
+    response = requests.get(f"{url}/cards/getFav?token={token}")
+    assert response.status_code == 200
+    assert any(card["card_id"] == card_id and card["faved"] == True for card in response.json())
