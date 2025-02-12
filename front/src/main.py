@@ -12,11 +12,6 @@ def page1():
         card = st.session_state.last_card
         st.text(f"You got: {card['name']}")
         st.image(card["images"]["large"])
-        if st.button("❤️", key=f"fav_{card['id']}"):
-            requests.post(
-                f"http://pokeopener_back:80/cards/fav?token={st.session_state.token}&id={card['id']}"
-            )
-
 
 def page2():
     c1, c2 = st.columns(2)
